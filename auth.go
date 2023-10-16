@@ -13,7 +13,7 @@ func validateRequestMiddleware(ccache cache.Cache) echo.MiddlewareFunc {
             // Get the request method, path, and bearer token from the request
             method := c.Request().Method
             path := c.Request().URL.Path
-            token := c.Request().Header.Get("Authorization")
+            bearerToken := c.Request().Header.Get("Authorization")
 
             // Match a route from cached config
             hasMatchedRoute, matchedRoute := matchConfigRoute(ccache, path, method)
@@ -27,9 +27,15 @@ func validateRequestMiddleware(ccache cache.Cache) echo.MiddlewareFunc {
                 return next(c)
             }
 
+            // Extract user
+            username, err := getUniqueUsername(bearerToken)
+            if err != nil {
+                return c.String(http.StatusUnauthorized, "No user found in token")
+            }
+
             // Make an HTTP request to an external service
             // Replace this with your actual validation logic
-            if validateRequestWithExternalService(method, path, token) {
+            if validateRequestWithExternalService(method, path, username) {
                 return next(c) // Proceed with the request handling
             }
 
@@ -40,9 +46,9 @@ func validateRequestMiddleware(ccache cache.Cache) echo.MiddlewareFunc {
 }
 
 // Replace this with your actual validation logic
-func validateRequestWithExternalService(method, path, token string) bool {
+func validateRequestWithExternalService(method, path, username string) bool {
     // Return true if the request is authorized, or false if it's not
-    log.Println(method, path, token)
+    log.Println(method, path, username)
 
     // Valildate against external auth service
     response, err := http.Get("http://httpbin.org/status/200%2C401")
