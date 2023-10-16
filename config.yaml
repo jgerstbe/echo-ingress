@@ -1,0 +1,36 @@
+routes:
+  - name: post1
+    method: GET
+    path: /posts/1
+    upstream_url: https://jsonplaceholder.typicode.com
+    upstream_auth: JWT
+    local_auth: Keycloak
+  - name: posts
+    method: POST
+    path: /posts
+    upstream_url: https://jsonplaceholder.typicode.com
+    upstream_auth: none
+    local_auth: Keycloak
+  - name: photos1
+    method: GET
+    path: /photos/1
+    upstream_url: https://jsonplaceholder.typicode.com
+    upstream_auth: none
+    local_auth: none
+  - name: photos1-del
+    method: DELETE
+    path: /photos/1
+    upstream_url: https://jsonplaceholder.typicode.com
+    upstream_auth: none
+    local_auth: none
+auth_schemes:
+  - name: Keycloak
+    type: ExternalResourceScopeValidation
+  - name: JWT
+    type: BearerTokenCached
+    config:
+      user: user
+      password: password
+      url: https://auth.example.com/token
+      refresh: false
+      ttl: 180
